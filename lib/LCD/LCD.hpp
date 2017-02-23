@@ -1,5 +1,5 @@
 #ifndef __LCD_H___INCLUDE__
-#define __LCD_H___INCLUDE__ 1
+#define __LCD_H___INCLUDE__
 
 #include <Adafruit_ST7735.h>
 
@@ -15,7 +15,7 @@ private:
   Adafruit_ST7735 _tft;
 
 public:
-  LCD(int cs_tft, int rs_dc, int res);
+  LCD(int csTftPin, int rsDcPin, int resPin);
   void init();
   void drawBackground();
   void drawQR();

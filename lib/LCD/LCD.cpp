@@ -8,10 +8,12 @@ int LCD::H_LINE_FROM_BOTTOM = 20;
 char LCD::BT_STR[] = "BT:";
 char LCD::WIFI_STR[] = "WiFi:";
 
-LCD::LCD(int cs_tft, int rs_dc, int res) : _tft(cs_tft, rs_dc, res) {
+LCD::LCD(int csTftPin, int rsDcPin, int resPin) : _tft(csTftPin, rsDcPin, resPin)
+{
 }
 
-void LCD::init() {
+void LCD::init()
+{
   _tft.initR(INITR_BLACKTAB);
   drawBackground();
 }
@@ -30,7 +32,8 @@ void LCD::drawBackground()
   _tft.print(WIFI_STR);
 }
 
-void LCD::drawQR() {
+void LCD::drawQR()
+{
   int blockSize = floor((_tft.width() - 2) / QRDuino::size());
   int startX = (_tft.width() - QRDuino::size() * blockSize) / 2;
   int startY = (_tft.height() - TEXT_V_PADDING - QRDuino::size() * blockSize) / 2;
