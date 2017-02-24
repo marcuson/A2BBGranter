@@ -5,35 +5,68 @@
 #define LCD_RES_PIN    48
 
 #define BT_EN_PIN    2
-#define BT_STATE_PIN 5
+#define BT_STATE_PIN -1
 
+#define WIFI_CH_PD_PIN -1
+#define WIFI_RST_PIN -1
+
+#include "Arduino.h"
 #include <SPI.h>
 #include <QRDuino.hpp>
 #include <LCD.hpp>
 #include <BT.hpp>
 
 LCD lcd(LCD_CS_TFT_PIN, LCD_RS_DC_PIN, LCD_RES_PIN);
-BT bt(Serial3, BT_EN_PIN, BT_STATE_PIN);
-char otp[5];
+BT bt(Serial3, BT_EN_PIN);
 
-void setup()
+char otp[6];
+
+void newOtp()
 {
-  lcd.init();
-  bt.init();
+  for (int i = 0; i < 5; i++) {
+    char c = (char) random(97, 123);
+    otp[i] = c;
+  }
+  otp[5] = '\0';
 
-  strcpy(otp, "abcde");
-  char qrData[strlen(bt.infoForQR()) + strlen(otp) + 1];
+  char qrData[strlen(bt.infoForQR()) + strlen(otp) + 2];
   strcpy(qrData, bt.infoForQR());
   strcat(qrData, ",");
   strcat(qrData, otp);
+  strcat(qrData, "\0");
 
-  lcd.drawBTPasskey(bt.pin());
+  Serial.print("New QRData is: ");
+  Serial.println(qrData);
+
   QRDuino::setData(qrData);
   QRDuino::encode();
+
+  lcd.drawBackground();
+  lcd.drawBTPasskey(bt.pin());
   lcd.drawQR();
+}
+
+void setup()
+{
+  // Init devices
+  lcd.init();
+  bt.init();
+  newOtp();
+
+  Serial.begin(9600);
 }
 
 void loop()
 {
+  // Read from BT module
+  bt.readAsPossible();
 
+  if (bt.hasCommandInBuffer()) {
+    bt.executeCommand(otp, lcd);
+    delay(5000);
+    bt.reset();
+    newOtp();
+  }
+
+  delay(100);
 }
