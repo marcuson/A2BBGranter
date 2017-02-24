@@ -1,5 +1,5 @@
 #ifndef __QRDUINO_H__INCLUDE__
-#define __QRDUINO_H__INCLUDE__ 1
+#define __QRDUINO_H__INCLUDE__
 
 #include <Adafruit_ST7735.h>
 
