@@ -6,15 +6,15 @@
 class LCD
 {
 private:
-  static int TEXT_H_PADDING;
-  static int TEXT_V_PADDING;
-  static int H_LINE_FROM_BOTTOM;
-  static char BT_STR[];
-  static char WIFI_STR[];
-
   Adafruit_ST7735 _tft;
 
 public:
+  static const int TEXT_H_PADDING;
+  static const int TEXT_V_PADDING;
+  static const int H_LINE_FROM_BOTTOM;
+  static const char BT_STR[];
+  static const char WIFI_STR[];
+
   LCD(int csTftPin, int rsDcPin, int resPin);
   void init();
   void clear();

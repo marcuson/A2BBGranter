@@ -1,16 +1,15 @@
 #include "LCD.hpp"
 #include <QRDuino.hpp>
 
-int LCD::TEXT_H_PADDING = 5;
-int LCD::TEXT_V_PADDING = 13;
-int LCD::H_LINE_FROM_BOTTOM = 20;
+const int LCD::TEXT_H_PADDING = 5;
+const int LCD::TEXT_V_PADDING = 13;
+const int LCD::H_LINE_FROM_BOTTOM = 20;
 
-char LCD::BT_STR[] = "BT:";
-char LCD::WIFI_STR[] = "WiFi:";
+const char LCD::BT_STR[] = "BT:";
+const char LCD::WIFI_STR[] = "WiFi:";
 
 LCD::LCD(int csTftPin, int rsDcPin, int resPin) : _tft(csTftPin, rsDcPin, resPin)
-{
-}
+{ }
 
 void LCD::init()
 {
@@ -84,10 +83,12 @@ void LCD::drawWiFiStatus(const char *status)
   _tft.print(status);
 }
 
-void LCD::drawSuccess() {
+void LCD::drawSuccess()
+{
   _tft.fillScreen(ST7735_GREEN);
 }
 
-void LCD::drawFail() {
+void LCD::drawFail()
+{
   _tft.fillScreen(ST7735_RED);
 }
