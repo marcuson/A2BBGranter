@@ -10,19 +10,45 @@
 #define WIFI_CH_PD_PIN -1
 #define WIFI_RST_PIN -1
 
+#define IS_IN true
+#define SUB_ID "8c5af6a8-7db8-4581-86fb-08750203dff0"
+
 #include "Arduino.h"
 #include <SPI.h>
+#include <WiFiEsp.h>
+
+#include <WIFI.hpp>
 #include <QRDuino.hpp>
 #include <LCD.hpp>
 #include <BT.hpp>
 
 LCD lcd(LCD_CS_TFT_PIN, LCD_RS_DC_PIN, LCD_RES_PIN);
 BT bt(Serial3, BT_EN_PIN);
+WIFI wifi(Serial1);
 
+int phase = 0;
+char currDevId[100];
 char otp[6];
+
+void success()
+{
+  lcd.drawSuccess();
+  phase = 0;
+  delay(5000);
+}
+
+void fail()
+{
+  lcd.drawFail();
+  phase = 0;
+  delay(5000);
+}
 
 void newOtp()
 {
+  bt.reset();
+  wifi.reset();
+
   for (int i = 0; i < 5; i++) {
     char c = (char) random(97, 123);
     otp[i] = c;
@@ -43,30 +69,111 @@ void newOtp()
 
   lcd.drawBackground();
   lcd.drawBTPasskey(bt.pin());
+  lcd.drawWiFiStatus(wifi.isConnected() ? "OK" : "KO");
   lcd.drawQR();
+
+  phase++;
+}
+
+void readBT()
+{
+  // Read from BT module
+  bt.readAsPossible();
+
+  // If data read is a grant request, go to next phase
+  if (bt.hasCommandInBuffer()) {
+    lcd.clear();
+    phase++;
+  }
+}
+
+void processBT()
+{
+  lcd.drawText("Checking OTP...", 0, 0, true);
+
+  if (!bt.checkOtp(otp, currDevId))
+  {
+    fail();
+    return;
+  }
+
+  lcd.drawText("OK");
+
+  lcd.drawText("Try granting access to device...\n", 0, lcd.getYNL(), true);
+  wifi.doGetRequest(IS_IN, currDevId, SUB_ID);
+
+  phase++;
+}
+
+void readREST()
+{
+  wifi.printDebug();
+
+  // if data received is a JSON response object, go to next phase
+  if (!wifi.hasResponseInBuffer())
+  {
+    Serial.println("Unable to get useful response from REST buffer!");
+    fail();
+    return;
+  }
+
+  phase++;
+}
+
+void processREST()
+{
+  Serial.print("HTTP status: ");
+  Serial.println(wifi.isHTTPStatusOk() ? "OK" : "NOT OK");
+  Serial.print("REST response code: ");
+  Serial.println(wifi.isRESTCodeOk() ? "OK" : "NOT OK");
+
+  if (wifi.isHTTPStatusOk() && wifi.isRESTCodeOk())
+  {
+    Serial.println("OK! Sending ack back");
+    bt.send("ack;");
+    success();
+  }
+  else
+  {
+    Serial.println("NOT ok, Sending nack back");
+    bt.send("nack;");
+    fail();
+  }
 }
 
 void setup()
 {
   // Init devices
-  lcd.init();
-  bt.init();
-  newOtp();
-
   Serial.begin(9600);
+
+  lcd.init();
+  lcd.drawText("Please wait...", 0, 0, true);
+  bt.init();
+  wifi.init();
 }
 
 void loop()
 {
-  // Read from BT module
-  bt.readAsPossible();
+  switch (phase)
+  {
+    case 0:
+      newOtp();
+      break;
 
-  if (bt.hasCommandInBuffer()) {
-    bt.executeCommand(otp, lcd);
-    delay(5000);
-    bt.reset();
-    newOtp();
+    case 1:
+      readBT();
+      break;
+
+    case 2:
+      processBT();
+      break;
+
+    case 3:
+      readREST();
+      break;
+
+    case 4:
+      processREST();
+      break;
   }
-
-  delay(100);
 }
