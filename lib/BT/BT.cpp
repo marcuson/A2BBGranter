@@ -25,9 +25,7 @@ BT::~BT()
 void BT::init()
 {
   pinMode(_enPin, OUTPUT);
-
   setEnabled(true);
-
   _serial.begin(BAUD);
 }
 
@@ -72,9 +70,6 @@ int BT::readAsPossible()
 
       char c = (char) _serial.read();
 
-      Serial.print("Arrived: ");
-      Serial.println(c);
-
       _readBuffer[_readBufferIndex] = c;
       _readBuffer[_readBufferIndex + 1] = '\0';
       _readBufferIndex++;
@@ -104,14 +99,12 @@ bool BT::hasCommandInBuffer()
   return _readBuffer[0] == '+' && _readBuffer[4] == '+' && _readBuffer[_readBufferIndex - 1] == '+';
 }
 
-void BT::executeCommand(char otp[], LCD &lcd)
+bool BT::checkOtp(char otp[], char* devId)
 {
   if (!hasCommandInBuffer())
   {
-    return;
+    return false;
   }
-
-  lcd.clear();
 
   Serial.print("From BT received: ");
   Serial.println(_readBuffer);
@@ -126,7 +119,6 @@ void BT::executeCommand(char otp[], LCD &lcd)
     int commaPos = commaPtr - _readBuffer;
 
     int devIdSize = commaPos - 5;
-    char devId[devIdSize + 1];
     strncpy(devId, _readBuffer + 5, devIdSize);
     devId[devIdSize] = '\0';
 
@@ -153,31 +145,13 @@ void BT::executeCommand(char otp[], LCD &lcd)
       Serial.print(otp);
       Serial.println("')");
 
-      send("nack;");
-
-      lcd.drawFail();
-
-      reset();
-      return;
+      return false;
     }
 
     Serial.println("' is valid");
-
-    lcd.drawText("Granting access to device: ", 0, 0, true);
-    lcd.drawText(devId);
-    lcd.drawText("\n");
-
-    // FIXME Do REST call
-
-    Serial.println("OK! Sending ack back");
-    lcd.drawText("OK! Sending ack back");
-
-    send("ack;");
-
-    lcd.drawSuccess();
   }
 
-  reset();
+  return true;
 }
 
 void BT::reset()
@@ -190,7 +164,7 @@ void BT::printDebug()
 {
   Serial.print("BT buffer: ");
 
-  for (int i = 0; i < 101; i++)
+  for (int i = 0; i < _readBufferSize; i++)
   {
     if (_readBuffer[i] == '\0')
     {

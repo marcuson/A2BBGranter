@@ -18,11 +18,9 @@ private:
 
 public:
   static int BAUD;
-  static char PIN[]; // PIN could be get programmatically with HC-05 put in AT mode.
-                     // But, the version I had couldn't be put in AT mode during
-                     // normal operation (you have to switch off the BT module,
-                     // press a button on it, then turn it on).
-                     // So the PIN is hardcoded here.
+  static char PIN[]; // PIN could be get programmatically with HC-05 put in AT mode. But, the version I had couldn't
+                     // be put in AT mode during normal operation (you have to switch off the BT module, press a
+                     // button on it, then turn it on). So the PIN is hardcoded here.
   static char NAME[]; // See comment on PIN
   static char MAC[]; // See comment on PIN
 
@@ -36,7 +34,7 @@ public:
   int available();
   int readAsPossible();
   bool hasCommandInBuffer();
-  void executeCommand(char *otp, LCD &lcd);
+  bool checkOtp(char otp[], char* devId);
   void send(char *data);
   void printDebug();
   void reset();
