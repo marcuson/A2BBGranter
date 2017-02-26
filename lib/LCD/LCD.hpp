@@ -25,6 +25,7 @@ public:
   void drawWiFiStatus(const char *status);
   void drawSuccess();
   void drawFail();
+  int getYNL();
 };
 
 #endif

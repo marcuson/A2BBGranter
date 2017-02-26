@@ -14,7 +14,7 @@ LCD::LCD(int csTftPin, int rsDcPin, int resPin) : _tft(csTftPin, rsDcPin, resPin
 void LCD::init()
 {
   _tft.initR(INITR_BLACKTAB);
-  drawBackground();
+  clear();
 }
 
 void LCD::clear()
@@ -91,4 +91,9 @@ void LCD::drawSuccess()
 void LCD::drawFail()
 {
   _tft.fillScreen(ST7735_RED);
+}
+
+int LCD::getYNL()
+{
+  return _tft.getCursorY() + TEXT_V_PADDING;
 }
