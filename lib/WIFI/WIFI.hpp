@@ -27,7 +27,7 @@ public:
 
   WIFI(HardwareSerial &serial);
   void init();
-  void doGetRequest(bool isIn, char devId[], char subId[]);
+  void doGetRequest(bool isIn, char devId[], char granterId[]);
   int available();
   bool isConnected();
   bool hasResponseInBuffer();

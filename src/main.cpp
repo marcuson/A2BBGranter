@@ -11,7 +11,7 @@
 #define WIFI_RST_PIN -1
 
 #define IS_IN true
-#define SUB_ID "8c5af6a8-7db8-4581-86fb-08750203dff0"
+#define GRANTER_ID "granter1"
 
 #include "Arduino.h"
 #include <SPI.h>
@@ -100,7 +100,7 @@ void processBT()
   lcd.drawText("OK");
 
   lcd.drawText("Try granting access to device...\n", 0, lcd.getYNL(), true);
-  wifi.doGetRequest(IS_IN, currDevId, SUB_ID);
+  wifi.doGetRequest(IS_IN, currDevId, GRANTER_ID);
 
   phase++;
 }

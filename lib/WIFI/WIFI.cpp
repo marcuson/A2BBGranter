@@ -34,7 +34,7 @@ bool WIFI::isConnected()
   return _status == WL_CONNECTED;
 }
 
-void WIFI::doGetRequest(bool isIn, char devId[], char subId[])
+void WIFI::doGetRequest(bool isIn, char devId[], char granterId[])
 {
   reset();
 
@@ -59,7 +59,7 @@ void WIFI::doGetRequest(bool isIn, char devId[], char subId[])
 
   _client.print(devId);
   _client.print("/");
-  _client.print(subId);
+  _client.print(granterId);
   _client.println(" HTTP/1.1");
 
   _client.print("Host: ");
