@@ -1,18 +1,25 @@
-#include "QRDuino.hpp"
-#include <avr/pgmspace.h>
 #include <string.h>
 
-// extern unsigned char neccblk1;
-// extern unsigned char neccblk2;
-// extern unsigned char datablkw;
-// extern unsigned char eccblkwid;
-// extern unsigned char VERSION;
-// extern unsigned char ECCLEVEL;
-// extern unsigned char WD, WDB;
-//
-// extern unsigned char rlens[];
-// extern const unsigned char framebase[] PROGMEM;
-// extern const unsigned char framask[] PROGMEM;
+#include "qrencode.h"
+#include "qrv3l1.c"
+
+extern unsigned char neccblk1;
+extern unsigned char neccblk2;
+extern unsigned char datablkw;
+extern unsigned char eccblkwid;
+extern unsigned char VERSION;
+extern unsigned char ECCLEVEL;
+extern unsigned char WD, WDB;
+#ifndef USEPRECALC
+// These are malloced by initframe
+extern unsigned char *rlens;
+extern unsigned char *framebase;
+extern unsigned char *framask;
+#else
+extern unsigned char rlens[];
+extern const unsigned char framebase[] PROGMEM;
+extern const unsigned char framask[] PROGMEM;
+#endif
 
 //========================================================================
 // Reed Solomon error correction
@@ -108,7 +115,7 @@ static void initrspoly(unsigned char eclen, unsigned char *genpoly)
         genpoly[i] = glog(genpoly[i]);     // use logs for genpoly[]
 }
 
-static void appendrs(unsigned char *data, unsigned char dlen,
+static void appendrs(unsigned char *data, unsigned char dlen, 
               unsigned char *ecbuf, unsigned char eclen, unsigned char *genpoly)
 {
     unsigned char i, j, fb;
@@ -278,7 +285,7 @@ static void fillframe(void)
 }
 
 //========================================================================
-// Masking
+// Masking 
 static void applymask(unsigned char m)
 {
     unsigned char x, y, r3x, r3y;
